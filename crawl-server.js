@@ -14,7 +14,7 @@ app.post('/crawl', async (req, res) => {
   try {
     const browser = await puppeteer.launch({
       args: ['--no-sandbox'],
-      headless: 'new',
+      headless: 'true',
     });
 
     const page = await browser.newPage();
