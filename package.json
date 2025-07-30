@@ -1,5 +1,5 @@
 {
-  "name": "zentrade-server",
+  "name": "zentra-crawl",
   "version": "1.0.0",
   "main": "crawl-server.js",
   "scripts": {
