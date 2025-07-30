@@ -1,35 +1,43 @@
-const express = require('express');
-const puppeteer = require('puppeteer');
+const express = require("express");
+const puppeteer = require("puppeteer");
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
 app.use(express.json());
 
-app.post('/crawl', async (req, res) => {
+// 테스트용 GET 엔드포인트 추가
+app.get("/", (req, res) => {
+  res.send("Puppeteer server is running!");
+});
+
+app.post("/", async (req, res) => {
   const { url } = req.body;
 
   if (!url) {
-    return res.status(400).send({ error: 'URL이 필요합니다' });
+    return res.status(400).json({ error: "Missing URL" });
   }
 
   try {
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox'],
-      headless: 'true',
+      headless: true, // "new" 대신 true
+      args: ["--no-sandbox", "--disable-setuid-sandbox"], // render에서 필수
     });
 
     const page = await browser.newPage();
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.goto(url, { waitUntil: "domcontentloaded" });
 
-    const title = await page.title();
+    const content = await page.content();
     await browser.close();
 
-    res.send({ title });
+    res.json({ html: content });
   } catch (error) {
-    res.status(500).send({ error: error.message });
+    console.error("Crawling error:", error.message);
+    res.status(500).json({ error: "Scraping failed", detail: error.message });
   }
 });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`서버 실행 중! http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
+
